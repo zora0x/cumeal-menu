@@ -1,4 +1,4 @@
-const CACHE_NAME = "cumeal-shell-v2";
+const CACHE_NAME = "cumeal-shell-v3";
 const SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
@@ -12,5 +12,13 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (new URL(event.request.url).origin !== self.location.origin) return;
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
+  );
 });
