@@ -51,7 +51,7 @@ function render() {
   const menu = menus.get(selectedDay);
   const container = document.querySelector("#menu");
   if (!menu) {
-    container.innerHTML = `<p class="status">No menu is available for this date.</p>`;
+    container.innerHTML = `<p class="status">No menu has been published for this date.</p>`;
     return;
   }
 
@@ -63,7 +63,7 @@ function render() {
         <p class="meal-value">${escapeHTML(menu[key].trim())}</p>
       </article>
     `).join("");
-  container.innerHTML = rows || `<p class="status">No menu is available for this date.</p>`;
+  container.innerHTML = rows || `<p class="status">No menu has been published for this date.</p>`;
 }
 
 function escapeHTML(value) {
@@ -93,13 +93,12 @@ async function fetchMenu(day) {
 
 async function loadMenus() {
   document.querySelector("#menu").innerHTML = `<p class="status">Loading menu…</p>`;
-  try {
-    await Promise.all(["today", "tomorrow"].map(fetchMenu));
-    render();
-  } catch {
-    render();
+  const results = await Promise.allSettled(["today", "tomorrow"].map(fetchMenu));
+  if (results.every(result => result.status === "rejected")) {
     document.querySelector("#menu").innerHTML = `<p class="status">Menu unavailable. Pull to refresh and try again.</p>`;
+    return;
   }
+  render();
 }
 
 document.querySelectorAll(".day-button").forEach(button => {
