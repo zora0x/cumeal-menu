@@ -106,10 +106,50 @@ button { font: inherit; }
   text-align: center;
 }
 
+.timings {
+  margin-top: 24px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.timings h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.timing-group + .timing-group {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #dedee3;
+}
+
+.timing-group h3 {
+  margin: 0 0 10px;
+  color: #85858c;
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.timing-group p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+
+.timing-group strong {
+  font-weight: 500;
+  text-align: right;
+}
+
 @media (prefers-color-scheme: dark) {
   :root, body { background: #1c1c1e; color: #f5f5f7; }
   .date, .meal-name { color: #98989f; }
-  .icon-button, .day-button.active, .menu { background: #2c2c2e; color: #f5f5f7; }
+  .icon-button, .day-button.active, .menu, .timings { background: #2c2c2e; color: #f5f5f7; }
   .day-picker { background: #3a3a3c; }
-  .meal + .meal { border-color: #48484a; }
+  .meal + .meal, .timing-group + .timing-group { border-color: #48484a; }
+  .timing-group h3 { color: #98989f; }
 }
