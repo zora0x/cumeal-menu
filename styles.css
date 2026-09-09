@@ -51,7 +51,7 @@ button { font: inherit; }
 
 .day-picker {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   padding: 4px;
   margin-bottom: 24px;
   border-radius: 18px;
@@ -107,7 +107,6 @@ button { font: inherit; }
 }
 
 .timings {
-  margin-top: 24px;
   padding: 18px 16px;
   border-radius: 16px;
   background: #fff;

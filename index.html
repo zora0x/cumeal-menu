@@ -22,9 +22,14 @@
     <div class="day-picker" role="tablist" aria-label="Menu day">
       <button class="day-button active" data-day="today" role="tab" aria-selected="true">Today</button>
       <button class="day-button" data-day="tomorrow" role="tab" aria-selected="false">Tomorrow</button>
+      <button class="day-button" data-day="timings" role="tab" aria-selected="false">Timings</button>
     </div>
 
-    <section class="timings" aria-labelledby="timings-title">
+    <section id="menu" class="menu" aria-live="polite">
+      <p class="status">Loading menu…</p>
+    </section>
+
+    <section id="timings" class="timings" aria-labelledby="timings-title" hidden>
       <h2 id="timings-title">Mess timings</h2>
       <div class="timing-group">
         <h3>Monday to Friday</h3>
@@ -40,10 +45,6 @@
         <p><span>Snacks</span><strong>4:30 PM – 5:15 PM</strong></p>
         <p><span>Dinner</span><strong>7:30 PM – 9:00 PM</strong></p>
       </div>
-    </section>
-
-    <section id="menu" class="menu" aria-live="polite">
-      <p class="status">Loading menu…</p>
     </section>
   </main>
   <script src="app.js"></script>

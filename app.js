@@ -40,7 +40,14 @@ function menuURL(day) {
 }
 
 function render() {
-  document.querySelector("#date").textContent = formatDate(dateFor(selectedDay));
+  const showingTimings = selectedDay === "timings";
+  document.querySelector("#date").textContent = showingTimings
+    ? "Mess timings"
+    : formatDate(dateFor(selectedDay));
+  document.querySelector("#menu").hidden = showingTimings;
+  document.querySelector("#timings").hidden = !showingTimings;
+  if (showingTimings) return;
+
   const menu = menus.get(selectedDay);
   const container = document.querySelector("#menu");
   if (!menu) {
