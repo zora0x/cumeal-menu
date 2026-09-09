@@ -114,7 +114,25 @@ document.querySelectorAll(".day-button").forEach(button => {
   });
 });
 
-document.querySelector("#refresh").addEventListener("click", loadMenus);
+async function refreshApp() {
+  const button = document.querySelector("#refresh");
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.update();
+    }
+    window.location.reload();
+  } catch {
+    await loadMenus();
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+  }
+}
+
+document.querySelector("#refresh").addEventListener("click", refreshApp);
 window.addEventListener("online", loadMenus);
 loadMenus();
 

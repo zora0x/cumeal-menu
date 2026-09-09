@@ -1,4 +1,4 @@
-const CACHE_NAME = "cumeal-shell-v3";
+const CACHE_NAME = "cumeal-shell-v4";
 const SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
@@ -12,8 +12,9 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (new URL(event.request.url).origin !== self.location.origin) return;
+  const request = new Request(event.request, { cache: "no-store" });
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then(response => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
