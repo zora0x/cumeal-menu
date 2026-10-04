@@ -55,7 +55,8 @@ function setSelectedDate(value) {
 function render() {
   const showingTimings = selectedSection === "timings";
   const date = dateFromValue(selectedDate);
-  dateControl.hidden = showingTimings;
+  dateControl.classList.toggle("date-control-hidden", showingTimings);
+  dateControl.setAttribute("aria-hidden", String(showingTimings));
   document.querySelector("#date").textContent = showingTimings
     ? "Mess timings"
     : formatDate(date);

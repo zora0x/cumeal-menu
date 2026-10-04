@@ -39,6 +39,11 @@ button { font: inherit; }
   cursor: pointer;
 }
 
+#date-control.date-control-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .date-chevron {
   display: inline-block;
   margin-left: 4px;
