@@ -79,6 +79,11 @@ button { font: inherit; }
 }
 .calendar-day:disabled { color: #c7c7cc; cursor: not-allowed; }
 .calendar-day.selected { background: #111; color: #fff; }
+.calendar-day.today:not(.selected) {
+  box-shadow: inset 0 0 0 2px #111;
+  font-weight: 700;
+}
+.calendar-day.selected.today { box-shadow: inset 0 0 0 2px #fff; }
 .calendar-note {
   margin: 12px 0 0;
   color: #85858c;
@@ -207,6 +212,8 @@ button { font: inherit; }
   .icon-button, .day-button.active, .menu, .timings { background: #2c2c2e; color: #f5f5f7; }
   .calendar { background: #2c2c2e; }
   .calendar-day.selected { background: #f5f5f7; color: #111; }
+  .calendar-day.today:not(.selected) { box-shadow: inset 0 0 0 2px #f5f5f7; }
+  .calendar-day.selected.today { box-shadow: inset 0 0 0 2px #111; }
   .day-picker { background: #3a3a3c; }
   .meal + .meal, .timing-group + .timing-group { border-color: #48484a; }
   .timing-group h3 { color: #98989f; }

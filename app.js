@@ -151,7 +151,8 @@ function renderCalendar() {
     const value = `${year}-10-${String(day).padStart(2, "0")}`;
     const available = availableDates.has(value);
     const selected = value === selectedDate ? " selected" : "";
-    cells.push(`<button class="calendar-day${selected}" type="button" data-date="${value}" ${available ? "" : "disabled"}>${day}</button>`);
+    const today = value === dateValue(new Date()) ? " today" : "";
+    cells.push(`<button class="calendar-day${selected}${today}" type="button" data-date="${value}" ${available ? "" : "disabled"}>${day}</button>`);
   }
   calendar.innerHTML = `<div class="calendar-header"><strong>October 2026</strong></div><div class="calendar-week"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="calendar-grid">${cells.join("")}</div><p class="calendar-note">Grey dates have no published menu.</p>`;
   calendar.querySelectorAll("[data-date]").forEach(button => {
@@ -214,6 +215,7 @@ selectedDate = today.getFullYear() === 2026 && today.getMonth() === 9
   : "2026-10-01";
 dateTrigger.addEventListener("click", () => {
   calendar.hidden = !calendar.hidden;
+  if (!calendar.hidden) renderCalendar();
 });
 document.querySelector("#refresh").addEventListener("click", refreshApp);
 loadMenu();
