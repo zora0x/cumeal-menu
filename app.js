@@ -12,6 +12,7 @@ const fields = [
 let selectedSection = "today";
 let selectedDate = "";
 let currentMenu = null;
+let loadRequest = 0;
 const dateTrigger = document.querySelector("#date-trigger");
 const calendar = document.querySelector("#calendar");
 const availableDates = new Set();
@@ -31,7 +32,10 @@ function firebaseMenuURL(dateValue) {
 }
 
 function dateValue(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function dateFromValue(value) {
@@ -40,7 +44,7 @@ function dateFromValue(value) {
 
 function setSelectedDate(value) {
   selectedDate = value;
-  render();
+  currentMenu = null;
   calendar.hidden = true;
   updateTabs();
 }
@@ -85,22 +89,31 @@ function fallbackMenu(dateValue) {
     : null;
 }
 
+function normalizeMenu(menu) {
+  if (!menu || typeof menu !== "object" || Array.isArray(menu)) return null;
+  return Object.fromEntries(fields
+    .filter(([key]) => typeof menu[key] === "string")
+    .map(([key]) => [key, menu[key].trim()]));
+}
+
 async function loadMenu() {
   if (selectedSection === "timings") {
     render();
     return;
   }
 
+  const request = ++loadRequest;
   document.querySelector("#menu").innerHTML = `<p class="status">Loading menu…</p>`;
   currentMenu = null;
   try {
     const response = await fetch(firebaseMenuURL(selectedDate), { cache: "no-store" });
     if (!response.ok) throw new Error("Firebase menu request failed");
     const firebaseMenu = await response.json();
-    currentMenu = firebaseMenu || fallbackMenu(selectedDate);
+    currentMenu = normalizeMenu(firebaseMenu) || fallbackMenu(selectedDate);
   } catch {
     currentMenu = fallbackMenu(selectedDate);
   }
+  if (request !== loadRequest) return;
   render();
 }
 

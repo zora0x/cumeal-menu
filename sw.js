@@ -1,4 +1,4 @@
-const CACHE_NAME = "cumeal-shell-v8";
+const CACHE_NAME = "cumeal-shell-v9";
 const SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./october-menu.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
