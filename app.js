@@ -91,9 +91,22 @@ function fallbackMenu(dateValue) {
 
 function normalizeMenu(menu) {
   if (!menu || typeof menu !== "object" || Array.isArray(menu)) return null;
-  return Object.fromEntries(fields
-    .filter(([key]) => typeof menu[key] === "string")
-    .map(([key]) => [key, menu[key].trim()]));
+  const normalized = {};
+  fields.forEach(([key]) => {
+    if (typeof menu[key] === "string" && menu[key].trim()) {
+      normalized[key] = menu[key].trim();
+    }
+  });
+  return Object.keys(normalized).length ? normalized : null;
+}
+
+function mergeMenus(primary, fallback) {
+  const firebaseMenu = normalizeMenu(primary) || {};
+  const fallbackData = normalizeMenu(fallback) || {};
+  return fields.reduce((menu, [key]) => {
+    menu[key] = firebaseMenu[key] || fallbackData[key] || "";
+    return menu;
+  }, {});
 }
 
 async function loadMenu() {
@@ -109,9 +122,9 @@ async function loadMenu() {
     const response = await fetch(firebaseMenuURL(selectedDate), { cache: "no-store" });
     if (!response.ok) throw new Error("Firebase menu request failed");
     const firebaseMenu = await response.json();
-    currentMenu = normalizeMenu(firebaseMenu) || fallbackMenu(selectedDate);
+    currentMenu = mergeMenus(firebaseMenu, fallbackMenu(selectedDate));
   } catch {
-    currentMenu = fallbackMenu(selectedDate);
+    currentMenu = mergeMenus(null, fallbackMenu(selectedDate));
   }
   if (request !== loadRequest) return;
   render();
