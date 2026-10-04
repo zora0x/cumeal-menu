@@ -4,8 +4,8 @@
   "description": "Today's and tomorrow's CuMeal menu.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#1c1c1e",
-  "theme_color": "#1c1c1e",
+  "background_color": "#f2f2f7",
+  "theme_color": "#f2f2f7",
   "icons": [
     {
       "src": "icon.svg",
