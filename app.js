@@ -13,6 +13,8 @@ let selectedSection = "today";
 let selectedDate = "";
 let currentMenu = null;
 let loadRequest = 0;
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let availabilityRequest = 0;
 const dateTrigger = document.querySelector("#date-trigger");
 const calendar = document.querySelector("#calendar");
 const availableDates = new Set();
@@ -84,17 +86,25 @@ function escapeHTML(value) {
 }
 
 function fallbackMenu(dateValue) {
-  return OCTOBER_MENU[dateValue]
-    ? { ...OCTOBER_MENU[dateValue], dinnerSouth: SOUTH_INDIAN_DINNER[dateValue] }
-    : null;
+  if (!OCTOBER_MENU[dateValue]) return null;
+  const menu = {
+    ...OCTOBER_MENU[dateValue],
+    dinnerSouth: SOUTH_INDIAN_DINNER[dateValue]
+  };
+  const dessert = PDF_DESSERTS[dateValue];
+  if (dessert && menu.dinner && !menu.dinner.toLowerCase().includes(dessert.toLowerCase())) {
+    menu.dinner = `${menu.dinner}, ${dessert}`;
+  }
+  return menu;
 }
 
 function normalizeMenu(menu) {
   if (!menu || typeof menu !== "object" || Array.isArray(menu)) return null;
   const normalized = {};
   fields.forEach(([key]) => {
-    if (typeof menu[key] === "string" && menu[key].trim()) {
-      normalized[key] = menu[key].trim();
+    const value = typeof menu[key] === "string" ? menu[key].trim() : "";
+    if (value && !(key === "breakfast" && /^\d{1,2}$/.test(value))) {
+      normalized[key] = value;
     }
   });
   return Object.keys(normalized).length ? normalized : null;
@@ -107,10 +117,6 @@ function mergeMenus(primary, fallback) {
     result[key] = firebaseMenu[key] || fallbackData[key] || "";
     return result;
   }, {});
-  const dessert = PDF_DESSERTS[selectedDate];
-  if (dessert && primary && menu.dinner && !menu.dinner.toLowerCase().includes(dessert.toLowerCase())) {
-    menu.dinner = `${menu.dinner}, ${dessert}`;
-  }
   return menu;
 }
 
@@ -145,8 +151,8 @@ function updateTabs() {
 }
 
 function renderCalendar() {
-  const year = 2026;
-  const month = 9;
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells = [];
@@ -154,13 +160,20 @@ function renderCalendar() {
     cells.push("<span></span>");
   }
   for (let day = 1; day <= daysInMonth; day += 1) {
-    const value = `${year}-10-${String(day).padStart(2, "0")}`;
+    const value = dateValue(new Date(year, month, day));
     const available = availableDates.has(value);
     const selected = value === selectedDate ? " selected" : "";
     const today = value === dateValue(new Date()) ? " today" : "";
     cells.push(`<button class="calendar-day${selected}${today}" type="button" data-date="${value}" ${available ? "" : "disabled"}>${day}</button>`);
   }
-  calendar.innerHTML = `<div class="calendar-header"><strong>October 2026</strong></div><div class="calendar-week"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="calendar-grid">${cells.join("")}</div><p class="calendar-note">Grey dates have no published menu.</p>`;
+  const monthName = calendarMonth.toLocaleString("en-US", { month: "long" });
+  calendar.innerHTML = `<div class="calendar-header"><button class="month-button" data-month="-1" type="button" aria-label="Previous month">‹</button><strong>${monthName} ${year}</strong><button class="month-button" data-month="1" type="button" aria-label="Next month">›</button></div><div class="calendar-week"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="calendar-grid">${cells.join("")}</div>`;
+  calendar.querySelectorAll("[data-month]").forEach(button => {
+    button.addEventListener("click", () => {
+      calendarMonth.setMonth(calendarMonth.getMonth() + Number(button.dataset.month));
+      loadAvailability();
+    });
+  });
   calendar.querySelectorAll("[data-date]").forEach(button => {
     button.addEventListener("click", () => {
       setSelectedDate(button.dataset.date);
@@ -170,7 +183,15 @@ function renderCalendar() {
 }
 
 async function loadAvailability() {
-  const dates = Array.from({ length: 31 }, (_, index) => `2026-10-${String(index + 1).padStart(2, "0")}`);
+  const request = ++availabilityRequest;
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+  const dates = Array.from(
+    { length: new Date(year, month + 1, 0).getDate() },
+    (_, index) => dateValue(new Date(year, month, index + 1))
+  );
+  availableDates.clear();
+  renderCalendar();
   const results = await Promise.all(dates.map(async value => {
     try {
       const response = await fetch(firebaseMenuURL(value), { cache: "no-store" });
@@ -183,6 +204,7 @@ async function loadAvailability() {
   results.forEach(([value, available]) => {
     if (available) availableDates.add(value);
   });
+  if (request !== availabilityRequest) return;
   renderCalendar();
 }
 
