@@ -247,3 +247,19 @@ const SOUTH_INDIAN_DINNER = {
   "2026-10-26": "Bhindi Kadhi, Veg Korma",
   "2026-10-27": "Veg Aviyal, Mulagi Sambar"
 };
+
+const PDF_DESSERTS = {
+  "2026-10-01": "Custard",
+  "2026-10-03": "Chocolate",
+  "2026-10-06": "Gulab Jamun",
+  "2026-10-08": "Brownie",
+  "2026-10-11": "Sabudana Kheer",
+  "2026-10-13": "Besan Ka Halwa",
+  "2026-10-15": "Vermicelli Pudding with Condensed Milk",
+  "2026-10-17": "Chocolate",
+  "2026-10-22": "Besan Ka Halwa",
+  "2026-10-24": "Kesari Kheer",
+  "2026-10-27": "Gulab Jamun",
+  "2026-10-29": "Vermicelli Payasam",
+  "2026-10-31": "Chocolate"
+};

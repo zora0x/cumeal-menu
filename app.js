@@ -103,10 +103,15 @@ function normalizeMenu(menu) {
 function mergeMenus(primary, fallback) {
   const firebaseMenu = normalizeMenu(primary) || {};
   const fallbackData = normalizeMenu(fallback) || {};
-  return fields.reduce((menu, [key]) => {
-    menu[key] = firebaseMenu[key] || fallbackData[key] || "";
-    return menu;
+  const menu = fields.reduce((result, [key]) => {
+    result[key] = firebaseMenu[key] || fallbackData[key] || "";
+    return result;
   }, {});
+  const dessert = PDF_DESSERTS[selectedDate];
+  if (dessert && primary && menu.dinner && !menu.dinner.toLowerCase().includes(dessert.toLowerCase())) {
+    menu.dinner = `${menu.dinner}, ${dessert}`;
+  }
+  return menu;
 }
 
 async function loadMenu() {
