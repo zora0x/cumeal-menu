@@ -98,12 +98,15 @@ function fallbackMenu(dateValue) {
   return menu;
 }
 
-function normalizeMenu(menu) {
+function normalizeMenu(menu, menuDate = "") {
   if (!menu || typeof menu !== "object" || Array.isArray(menu)) return null;
   const normalized = {};
+  const selectedDay = menuDate ? String(Number(menuDate.slice(-2))) : "";
   fields.forEach(([key]) => {
     const value = typeof menu[key] === "string" ? menu[key].trim() : "";
-    if (value && !(key === "breakfast" && /^\d{1,2}$/.test(value))) {
+    const isDatePlaceholder = key === "breakfast"
+      && (value === selectedDay || /^\d{1,2}$/.test(value));
+    if (value && !isDatePlaceholder) {
       normalized[key] = value;
     }
   });
@@ -111,8 +114,8 @@ function normalizeMenu(menu) {
 }
 
 function mergeMenus(primary, fallback) {
-  const firebaseMenu = normalizeMenu(primary) || {};
-  const fallbackData = normalizeMenu(fallback) || {};
+  const firebaseMenu = normalizeMenu(primary, selectedDate) || {};
+  const fallbackData = normalizeMenu(fallback, selectedDate) || {};
   const menu = fields.reduce((result, [key]) => {
     result[key] = firebaseMenu[key] || fallbackData[key] || "";
     return result;
