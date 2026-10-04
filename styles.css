@@ -170,7 +170,7 @@ button { font: inherit; }
   padding: 16px;
 }
 
-.meal + .meal { border-top: 1px solid #dedee3; }
+.meal + .meal { border-top: 1px solid #48484a; }
 
 .meal-name {
   margin: 0 0 6px;
