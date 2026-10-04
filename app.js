@@ -16,6 +16,7 @@ let loadRequest = 0;
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let availabilityRequest = 0;
 const dateTrigger = document.querySelector("#date-trigger");
+const dateControl = document.querySelector("#date-control");
 const calendar = document.querySelector("#calendar");
 const availableDates = new Set();
 
@@ -54,6 +55,7 @@ function setSelectedDate(value) {
 function render() {
   const showingTimings = selectedSection === "timings";
   const date = dateFromValue(selectedDate);
+  dateControl.hidden = showingTimings;
   document.querySelector("#date").textContent = showingTimings
     ? "Mess timings"
     : formatDate(date);
@@ -218,6 +220,9 @@ document.querySelectorAll(".day-button").forEach(button => {
       setSelectedDate(offsetDate(0));
     } else if (selectedSection === "tomorrow") {
       setSelectedDate(offsetDate(1));
+    } else {
+      updateTabs();
+      render();
     }
     loadMenu();
   });
