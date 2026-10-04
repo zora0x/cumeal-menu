@@ -15,6 +15,7 @@ let currentMenu = null;
 let loadRequest = 0;
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let availabilityRequest = 0;
+const availabilityCache = new Map();
 const dateTrigger = document.querySelector("#date-trigger");
 const dateControl = document.querySelector("#date-control");
 const calendar = document.querySelector("#calendar");
@@ -165,9 +166,11 @@ function renderCalendar() {
   for (let index = 0; index < firstDay; index += 1) {
     cells.push("<span></span>");
   }
+  const monthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const monthAvailability = availabilityCache.get(monthKey) || new Set();
   for (let day = 1; day <= daysInMonth; day += 1) {
     const value = dateValue(new Date(year, month, day));
-    const available = availableDates.has(value);
+    const available = monthAvailability.has(value);
     const selected = value === selectedDate ? " selected" : "";
     const today = value === dateValue(new Date()) ? " today" : "";
     cells.push(`<button class="calendar-day${selected}${today}" type="button" data-date="${value}" ${available ? "" : "disabled"}>${day}</button>`);
@@ -177,6 +180,9 @@ function renderCalendar() {
   calendar.querySelectorAll("[data-month]").forEach(button => {
     button.addEventListener("click", () => {
       calendarMonth.setMonth(calendarMonth.getMonth() + Number(button.dataset.month));
+      calendar.classList.remove("calendar-spark");
+      void calendar.offsetWidth;
+      calendar.classList.add("calendar-spark");
       loadAvailability();
     });
   });
@@ -196,7 +202,15 @@ async function loadAvailability() {
     { length: new Date(year, month + 1, 0).getDate() },
     (_, index) => dateValue(new Date(year, month, index + 1))
   );
-  availableDates.clear();
+  const monthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const cachedDates = new Set();
+  if (month === 9 && year === 2026) {
+    for (let day = 1; day <= 31; day += 1) {
+      const value = `2026-10-${String(day).padStart(2, "0")}`;
+      if (OCTOBER_MENU[value]) cachedDates.add(value);
+    }
+  }
+  availabilityCache.set(monthKey, cachedDates);
   renderCalendar();
   const results = await Promise.all(dates.map(async value => {
     try {
@@ -208,8 +222,9 @@ async function loadAvailability() {
     }
   }));
   results.forEach(([value, available]) => {
-    if (available) availableDates.add(value);
+    if (available) cachedDates.add(value);
   });
+  availabilityCache.set(monthKey, cachedDates);
   if (request !== availabilityRequest) return;
   renderCalendar();
 }

@@ -62,6 +62,11 @@ button { font: inherit; }
   background: #fff;
   box-shadow: 0 8px 30px #0002;
 }
+.calendar-spark { animation: calendar-in .18s ease-out; }
+@keyframes calendar-in {
+  from { opacity: .45; transform: translateY(-5px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 .calendar-header {
   display: flex;
@@ -100,11 +105,16 @@ button { font: inherit; }
 }
 .calendar-day:disabled { color: #c7c7cc; cursor: not-allowed; }
 .calendar-day.selected { background: #111; color: #fff; }
+.calendar-day.selected { animation: selected-pop .2s ease-out; }
 .calendar-day.today:not(.selected) {
   box-shadow: inset 0 0 0 2px #111;
   font-weight: 700;
 }
 .calendar-day.selected.today { box-shadow: inset 0 0 0 2px #fff; }
+@keyframes selected-pop {
+  from { transform: scale(.78); }
+  to { transform: scale(1); }
+}
 .date {
   margin: 0;
   color: #6f6f76;
