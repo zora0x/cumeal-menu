@@ -217,3 +217,33 @@ const OCTOBER_MENU = {
     dinner: "Chana Dal Tadka, Dum Aloo, Steamed Rice, Green Salad, Chapati, Chocolate"
   }
 };
+
+const SOUTH_INDIAN_DINNER = {
+  "2026-10-01": "Tomato Dal, Sorakkai Kootu",
+  "2026-10-02": "Veg Poriyal, Mudda Pappu",
+  "2026-10-03": "Bhindi Kadhi, Urele Roasted",
+  "2026-10-04": "Regular Menu",
+  "2026-10-05": "Palak Dal, Beans Carrot Thorn",
+  "2026-10-06": "Palak Dal, Veg Korma, Coconut Rice",
+  "2026-10-07": "Regular Menu",
+  "2026-10-08": "Gatti Vankay, Veg Sambar",
+  "2026-10-09": "Methi Dal, Valakai Poriyal",
+  "2026-10-10": "Palak Dal, Ennai Klatrikai Kootu, Onion Rice",
+  "2026-10-11": "Regular Menu",
+  "2026-10-12": "Lobiya Dal, Veg Korma",
+  "2026-10-13": "Tomato Pappu, Banana Poriyal",
+  "2026-10-14": "Regular Menu",
+  "2026-10-15": "Tomato Pappu, Ennai Katrikai Kolambu",
+  "2026-10-16": "Potato Onion Andhra Style, Veg Sambar, Mint Rice",
+  "2026-10-17": "Andhra Palakura Pappu, Valakai Kootu",
+  "2026-10-18": "Regular Menu",
+  "2026-10-19": "Veg Poriyal, Mudda Pappu",
+  "2026-10-20": "Tomato Pappu, Banana Poriyal",
+  "2026-10-21": "Regular Menu",
+  "2026-10-22": "Sabut Masoor, Veg Chettinad, Veg Pulao",
+  "2026-10-23": "Green Methi Dal, Carrot Beans Thorn",
+  "2026-10-24": "Palak Dal, Potato Onion Smasher, Pudina Rice",
+  "2026-10-25": "Regular Menu",
+  "2026-10-26": "Bhindi Kadhi, Veg Korma",
+  "2026-10-27": "Veg Aviyal, Mulagi Sambar"
+};

@@ -4,10 +4,11 @@ const fields = [
   ["lunch", "Lunch"],
   ["snacksBoys", "Snacks (Boys)"],
   ["snacksGirls", "Snacks (Girls)"],
-  ["dinner", "Dinner"]
+  ["dinner", "Dinner"],
+  ["dinnerSouth", "South Indian Dinner"]
 ];
 
-let selectedSection = "menu";
+let selectedSection = "today";
 const dateInput = document.querySelector("#date-select");
 
 function formatDate(date) {
@@ -28,7 +29,9 @@ function render() {
   document.querySelector("#timings").hidden = !showingTimings;
   if (showingTimings) return;
 
-  const menu = OCTOBER_MENU[dateInput.value];
+  const menu = OCTOBER_MENU[dateInput.value]
+    ? { ...OCTOBER_MENU[dateInput.value], dinnerSouth: SOUTH_INDIAN_DINNER[dateInput.value] }
+    : null;
   const container = document.querySelector("#menu");
   if (!menu) {
     container.innerHTML = `<p class="status">No menu has been published for this date.</p>`;
@@ -59,6 +62,11 @@ function loadMenus() {
 document.querySelectorAll(".day-button").forEach(button => {
   button.addEventListener("click", () => {
     selectedSection = button.dataset.day;
+    if (selectedSection === "today") {
+      dateInput.value = offsetDate(0);
+    } else if (selectedSection === "tomorrow") {
+      dateInput.value = offsetDate(1);
+    }
     document.querySelectorAll(".day-button").forEach(item => {
       const active = item === button;
       item.classList.toggle("active", active);
@@ -68,6 +76,12 @@ document.querySelectorAll(".day-button").forEach(button => {
   });
 });
 
+function offsetDate(days) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 function refreshApp() {
   const button = document.querySelector("#refresh");
   button.disabled = true;
@@ -76,11 +90,17 @@ function refreshApp() {
 }
 
 const today = new Date();
-const octoberDate = today.getFullYear() === 2026 && today.getMonth() === 9
+dateInput.value = today.getFullYear() === 2026 && today.getMonth() === 9
   ? today.toISOString().slice(0, 10)
   : "2026-10-01";
-dateInput.value = octoberDate;
-dateInput.addEventListener("change", loadMenus);
+dateInput.addEventListener("change", () => {
+  selectedSection = "today";
+  document.querySelectorAll(".day-button").forEach(item => {
+    item.classList.toggle("active", item.dataset.day === "today");
+    item.setAttribute("aria-selected", String(item.dataset.day === "today"));
+  });
+  loadMenus();
+});
 document.querySelector("#refresh").addEventListener("click", refreshApp);
 loadMenus();
 

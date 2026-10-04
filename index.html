@@ -14,19 +14,17 @@
   <main class="app">
     <header class="header">
       <div>
-        <p id="date" class="date"></p>
-      </div>
-      <div class="header-actions">
         <label class="date-picker" aria-label="Select menu date">
-          <span>Date</span>
+          <span id="date" class="date"></span>
           <input id="date-select" type="date" min="2026-10-01" max="2026-10-31">
         </label>
-        <button id="refresh" class="icon-button" type="button" aria-label="Refresh menu">↻</button>
       </div>
+      <button id="refresh" class="icon-button" type="button" aria-label="Refresh menu">↻</button>
     </header>
 
-    <div class="day-picker" role="tablist" aria-label="App section">
-      <button class="day-button active" data-day="menu" role="tab" aria-selected="true">Menu</button>
+    <div class="day-picker" role="tablist" aria-label="Menu view">
+      <button class="day-button active" data-day="today" role="tab" aria-selected="true">Today</button>
+      <button class="day-button" data-day="tomorrow" role="tab" aria-selected="false">Tomorrow</button>
       <button class="day-button" data-day="timings" role="tab" aria-selected="false">Timings</button>
     </div>
 
