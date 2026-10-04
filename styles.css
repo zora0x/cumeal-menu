@@ -31,8 +31,11 @@ button { font: inherit; }
 }
 
 .date-picker {
-  position: relative;
   display: inline-block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
 }
 
@@ -45,14 +48,41 @@ button { font: inherit; }
   transform: translateY(-1px);
 }
 
-.date-picker input {
+.calendar {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  z-index: 2;
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 30px #0002;
+}
+
+.calendar-header { margin-bottom: 12px; }
+.calendar-week, .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 32px);
+  gap: 4px;
+  text-align: center;
+}
+.calendar-week {
+  color: #85858c;
+  font-size: 11px;
+}
+.calendar-day {
+  width: 32px;
+  height: 32px;
   border: 0;
-  opacity: 0;
+  border-radius: 50%;
+  background: transparent;
   cursor: pointer;
+}
+.calendar-day:disabled { color: #c7c7cc; cursor: not-allowed; }
+.calendar-day.selected { background: #111; color: #fff; }
+.calendar-note {
+  margin: 12px 0 0;
+  color: #85858c;
+  font-size: 11px;
 }
 
 .date {
@@ -73,6 +103,8 @@ button { font: inherit; }
   line-height: 1;
   cursor: pointer;
 }
+.icon-button.spinning { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .day-picker {
   display: grid;
@@ -173,6 +205,8 @@ button { font: inherit; }
   :root, body { background: #1c1c1e; color: #f5f5f7; }
   .date, .meal-name { color: #98989f; }
   .icon-button, .day-button.active, .menu, .timings { background: #2c2c2e; color: #f5f5f7; }
+  .calendar { background: #2c2c2e; }
+  .calendar-day.selected { background: #f5f5f7; color: #111; }
   .day-picker { background: #3a3a3c; }
   .meal + .meal, .timing-group + .timing-group { border-color: #48484a; }
   .timing-group h3 { color: #98989f; }

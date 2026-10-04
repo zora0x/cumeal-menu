@@ -14,11 +14,11 @@
   <main class="app">
     <header class="header">
       <div>
-        <label class="date-picker" aria-label="Select menu date">
+        <button id="date-trigger" class="date-picker" type="button" aria-label="Select menu date">
           <span id="date" class="date"></span>
           <span class="date-chevron" aria-hidden="true">⌄</span>
-          <input id="date-select" type="date">
-        </label>
+        </button>
+        <div id="calendar" class="calendar" hidden></div>
       </div>
       <button id="refresh" class="icon-button" type="button" aria-label="Refresh menu">↻</button>
     </header>

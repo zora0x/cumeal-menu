@@ -10,7 +10,11 @@ const fields = [
 ];
 
 let selectedSection = "today";
-const dateInput = document.querySelector("#date-select");
+let selectedDate = "";
+let currentMenu = null;
+const dateTrigger = document.querySelector("#date-trigger");
+const calendar = document.querySelector("#calendar");
+const availableDates = new Set();
 
 function formatDate(date) {
   return new Intl.DateTimeFormat("en-US", {
@@ -26,12 +30,27 @@ function firebaseMenuURL(dateValue) {
   return `${DATABASE_URL}/${date.getFullYear()}/${month}/${date.getDate()}.json`;
 }
 
+function dateValue(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function dateFromValue(value) {
+  return new Date(`${value}T12:00:00`);
+}
+
+function setSelectedDate(value) {
+  selectedDate = value;
+  render();
+  calendar.hidden = true;
+  updateTabs();
+}
+
 function render() {
   const showingTimings = selectedSection === "timings";
-  const selectedDate = new Date(`${dateInput.value}T12:00:00`);
+  const date = dateFromValue(selectedDate);
   document.querySelector("#date").textContent = showingTimings
     ? "Mess timings"
-    : formatDate(selectedDate);
+    : formatDate(date);
   document.querySelector("#menu").hidden = showingTimings;
   document.querySelector("#timings").hidden = !showingTimings;
   if (showingTimings) return;
@@ -60,8 +79,6 @@ function escapeHTML(value) {
   }[character]));
 }
 
-let currentMenu = null;
-
 function fallbackMenu(dateValue) {
   return OCTOBER_MENU[dateValue]
     ? { ...OCTOBER_MENU[dateValue], dinnerSouth: SOUTH_INDIAN_DINNER[dateValue] }
@@ -77,29 +94,73 @@ async function loadMenu() {
   document.querySelector("#menu").innerHTML = `<p class="status">Loading menu…</p>`;
   currentMenu = null;
   try {
-    const response = await fetch(firebaseMenuURL(dateInput.value), { cache: "no-store" });
+    const response = await fetch(firebaseMenuURL(selectedDate), { cache: "no-store" });
     if (!response.ok) throw new Error("Firebase menu request failed");
     const firebaseMenu = await response.json();
-    currentMenu = firebaseMenu || fallbackMenu(dateInput.value);
+    currentMenu = firebaseMenu || fallbackMenu(selectedDate);
   } catch {
-    currentMenu = fallbackMenu(dateInput.value);
+    currentMenu = fallbackMenu(selectedDate);
   }
   render();
+}
+
+function updateTabs() {
+  document.querySelectorAll(".day-button").forEach(item => {
+    const active = item.dataset.day === selectedSection;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-selected", String(active));
+  });
+}
+
+function renderCalendar() {
+  const year = 2026;
+  const month = 9;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = [];
+  for (let index = 0; index < firstDay; index += 1) {
+    cells.push("<span></span>");
+  }
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const value = `${year}-10-${String(day).padStart(2, "0")}`;
+    const available = availableDates.has(value);
+    const selected = value === selectedDate ? " selected" : "";
+    cells.push(`<button class="calendar-day${selected}" type="button" data-date="${value}" ${available ? "" : "disabled"}>${day}</button>`);
+  }
+  calendar.innerHTML = `<div class="calendar-header"><strong>October 2026</strong></div><div class="calendar-week"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="calendar-grid">${cells.join("")}</div><p class="calendar-note">Grey dates have no published menu.</p>`;
+  calendar.querySelectorAll("[data-date]").forEach(button => {
+    button.addEventListener("click", () => {
+      setSelectedDate(button.dataset.date);
+      loadMenu();
+    });
+  });
+}
+
+async function loadAvailability() {
+  const dates = Array.from({ length: 31 }, (_, index) => `2026-10-${String(index + 1).padStart(2, "0")}`);
+  const results = await Promise.all(dates.map(async value => {
+    try {
+      const response = await fetch(firebaseMenuURL(value), { cache: "no-store" });
+      const menu = await response.json();
+      return [value, Boolean(menu || fallbackMenu(value))];
+    } catch {
+      return [value, Boolean(fallbackMenu(value))];
+    }
+  }));
+  results.forEach(([value, available]) => {
+    if (available) availableDates.add(value);
+  });
+  renderCalendar();
 }
 
 document.querySelectorAll(".day-button").forEach(button => {
   button.addEventListener("click", () => {
     selectedSection = button.dataset.day;
     if (selectedSection === "today") {
-      dateInput.value = offsetDate(0);
+      setSelectedDate(offsetDate(0));
     } else if (selectedSection === "tomorrow") {
-      dateInput.value = offsetDate(1);
+      setSelectedDate(offsetDate(1));
     }
-    document.querySelectorAll(".day-button").forEach(item => {
-      const active = item === button;
-      item.classList.toggle("active", active);
-      item.setAttribute("aria-selected", String(active));
-    });
     loadMenu();
   });
 });
@@ -112,25 +173,25 @@ function offsetDate(days) {
 
 function refreshApp() {
   const button = document.querySelector("#refresh");
+  button.classList.add("spinning");
   button.disabled = true;
-  button.setAttribute("aria-busy", "true");
-  window.location.reload();
+  if (navigator.vibrate) navigator.vibrate(10);
+  Promise.all([loadMenu(), loadAvailability()]).finally(() => {
+    button.classList.remove("spinning");
+    button.disabled = false;
+  });
 }
 
 const today = new Date();
-dateInput.value = today.getFullYear() === 2026 && today.getMonth() === 9
-  ? today.toISOString().slice(0, 10)
+selectedDate = today.getFullYear() === 2026 && today.getMonth() === 9
+  ? dateValue(today)
   : "2026-10-01";
-dateInput.addEventListener("change", () => {
-  selectedSection = "today";
-  document.querySelectorAll(".day-button").forEach(item => {
-    item.classList.toggle("active", item.dataset.day === "today");
-    item.setAttribute("aria-selected", String(item.dataset.day === "today"));
-  });
-  loadMenu();
+dateTrigger.addEventListener("click", () => {
+  calendar.hidden = !calendar.hidden;
 });
 document.querySelector("#refresh").addEventListener("click", refreshApp);
 loadMenu();
+loadAvailability();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
