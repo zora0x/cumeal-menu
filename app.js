@@ -1,4 +1,5 @@
 const CACHE_NAME = "cumeal-menu-v2";
+const DATABASE_URL = "https://cumeal-4090b-default-rtdb.firebaseio.com/menu";
 const fields = [
   ["breakfast", "Breakfast"],
   ["lunch", "Lunch"],
@@ -19,6 +20,12 @@ function formatDate(date) {
   }).format(date);
 }
 
+function firebaseMenuURL(dateValue) {
+  const date = new Date(`${dateValue}T12:00:00`);
+  const month = date.toLocaleString("en-US", { month: "long" });
+  return `${DATABASE_URL}/${date.getFullYear()}/${month}/${date.getDate()}.json`;
+}
+
 function render() {
   const showingTimings = selectedSection === "timings";
   const selectedDate = new Date(`${dateInput.value}T12:00:00`);
@@ -29,9 +36,7 @@ function render() {
   document.querySelector("#timings").hidden = !showingTimings;
   if (showingTimings) return;
 
-  const menu = OCTOBER_MENU[dateInput.value]
-    ? { ...OCTOBER_MENU[dateInput.value], dinnerSouth: SOUTH_INDIAN_DINNER[dateInput.value] }
-    : null;
+  const menu = currentMenu;
   const container = document.querySelector("#menu");
   if (!menu) {
     container.innerHTML = `<p class="status">No menu has been published for this date.</p>`;
@@ -55,7 +60,30 @@ function escapeHTML(value) {
   }[character]));
 }
 
-function loadMenus() {
+let currentMenu = null;
+
+function fallbackMenu(dateValue) {
+  return OCTOBER_MENU[dateValue]
+    ? { ...OCTOBER_MENU[dateValue], dinnerSouth: SOUTH_INDIAN_DINNER[dateValue] }
+    : null;
+}
+
+async function loadMenu() {
+  if (selectedSection === "timings") {
+    render();
+    return;
+  }
+
+  document.querySelector("#menu").innerHTML = `<p class="status">Loading menu…</p>`;
+  currentMenu = null;
+  try {
+    const response = await fetch(firebaseMenuURL(dateInput.value), { cache: "no-store" });
+    if (!response.ok) throw new Error("Firebase menu request failed");
+    const firebaseMenu = await response.json();
+    currentMenu = firebaseMenu || fallbackMenu(dateInput.value);
+  } catch {
+    currentMenu = fallbackMenu(dateInput.value);
+  }
   render();
 }
 
@@ -72,7 +100,7 @@ document.querySelectorAll(".day-button").forEach(button => {
       item.classList.toggle("active", active);
       item.setAttribute("aria-selected", String(active));
     });
-    loadMenus();
+    loadMenu();
   });
 });
 
@@ -99,10 +127,10 @@ dateInput.addEventListener("change", () => {
     item.classList.toggle("active", item.dataset.day === "today");
     item.setAttribute("aria-selected", String(item.dataset.day === "today"));
   });
-  loadMenus();
+  loadMenu();
 });
 document.querySelector("#refresh").addEventListener("click", refreshApp);
-loadMenus();
+loadMenu();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");

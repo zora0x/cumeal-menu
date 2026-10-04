@@ -36,6 +36,15 @@ button { font: inherit; }
   cursor: pointer;
 }
 
+.date-chevron {
+  display: inline-block;
+  margin-left: 4px;
+  color: #85858c;
+  font-size: 20px;
+  line-height: 0;
+  transform: translateY(-1px);
+}
+
 .date-picker input {
   position: absolute;
   inset: 0;
