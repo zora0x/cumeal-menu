@@ -1,30 +1,14 @@
-const DATABASE_URL = "https://cumeal-4090b-default-rtdb.firebaseio.com/menu";
-const CACHE_NAME = "cumeal-menu-v1";
+const CACHE_NAME = "cumeal-menu-v2";
 const fields = [
   ["breakfast", "Breakfast"],
   ["lunch", "Lunch"],
   ["snacksBoys", "Snacks (Boys)"],
   ["snacksGirls", "Snacks (Girls)"],
-  ["dinner", "Dinner"],
-  ["dinnerSouth", "Dinner (South)"]
+  ["dinner", "Dinner"]
 ];
 
-let selectedDay = "today";
-const menus = new Map();
-
-function dateFor(day) {
-  const date = new Date();
-  if (day === "tomorrow") date.setDate(date.getDate() + 1);
-  return date;
-}
-
-function dateParts(date) {
-  return {
-    year: date.getFullYear(),
-    month: date.toLocaleString("en-US", { month: "long" }),
-    day: date.getDate()
-  };
-}
+let selectedSection = "menu";
+const dateInput = document.querySelector("#date-select");
 
 function formatDate(date) {
   return new Intl.DateTimeFormat("en-US", {
@@ -34,21 +18,17 @@ function formatDate(date) {
   }).format(date);
 }
 
-function menuURL(day) {
-  const { year, month, day: date } = dateParts(dateFor(day));
-  return `${DATABASE_URL}/${year}/${month}/${date}.json`;
-}
-
 function render() {
-  const showingTimings = selectedDay === "timings";
+  const showingTimings = selectedSection === "timings";
+  const selectedDate = new Date(`${dateInput.value}T12:00:00`);
   document.querySelector("#date").textContent = showingTimings
     ? "Mess timings"
-    : formatDate(dateFor(selectedDay));
+    : formatDate(selectedDate);
   document.querySelector("#menu").hidden = showingTimings;
   document.querySelector("#timings").hidden = !showingTimings;
   if (showingTimings) return;
 
-  const menu = menus.get(selectedDay);
+  const menu = OCTOBER_MENU[dateInput.value];
   const container = document.querySelector("#menu");
   if (!menu) {
     container.innerHTML = `<p class="status">No menu has been published for this date.</p>`;
@@ -72,67 +52,36 @@ function escapeHTML(value) {
   }[character]));
 }
 
-async function fetchMenu(day) {
-  const url = menuURL(day);
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Menu request failed");
-    const data = await response.json();
-    if (!data) throw new Error("Menu unavailable");
-    await cache.put(url, new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" }
-    }));
-    menus.set(day, data);
-  } catch (error) {
-    const cached = await cache.match(url);
-    if (!cached) throw error;
-    menus.set(day, await cached.json());
-  }
-}
-
-async function loadMenus() {
-  document.querySelector("#menu").innerHTML = `<p class="status">Loading menu…</p>`;
-  const results = await Promise.allSettled(["today", "tomorrow"].map(fetchMenu));
-  if (results.every(result => result.status === "rejected")) {
-    document.querySelector("#menu").innerHTML = `<p class="status">Menu unavailable. Pull to refresh and try again.</p>`;
-    return;
-  }
+function loadMenus() {
   render();
 }
 
 document.querySelectorAll(".day-button").forEach(button => {
   button.addEventListener("click", () => {
-    selectedDay = button.dataset.day;
+    selectedSection = button.dataset.day;
     document.querySelectorAll(".day-button").forEach(item => {
       const active = item === button;
       item.classList.toggle("active", active);
       item.setAttribute("aria-selected", String(active));
     });
-    render();
+    loadMenus();
   });
 });
 
-async function refreshApp() {
+function refreshApp() {
   const button = document.querySelector("#refresh");
   button.disabled = true;
   button.setAttribute("aria-busy", "true");
-
-  try {
-    if ("serviceWorker" in navigator) {
-      const registration = await navigator.serviceWorker.ready;
-      await registration.update();
-    }
-    window.location.reload();
-  } catch {
-    await loadMenus();
-    button.disabled = false;
-    button.removeAttribute("aria-busy");
-  }
+  window.location.reload();
 }
 
+const today = new Date();
+const octoberDate = today.getFullYear() === 2026 && today.getMonth() === 9
+  ? today.toISOString().slice(0, 10)
+  : "2026-10-01";
+dateInput.value = octoberDate;
+dateInput.addEventListener("change", loadMenus);
 document.querySelector("#refresh").addEventListener("click", refreshApp);
-window.addEventListener("online", loadMenus);
 loadMenus();
 
 if ("serviceWorker" in navigator) {

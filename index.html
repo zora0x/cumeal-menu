@@ -16,12 +16,17 @@
       <div>
         <p id="date" class="date"></p>
       </div>
-      <button id="refresh" class="icon-button" type="button" aria-label="Refresh menu">↻</button>
+      <div class="header-actions">
+        <label class="date-picker" aria-label="Select menu date">
+          <span>Date</span>
+          <input id="date-select" type="date" min="2026-10-01" max="2026-10-31">
+        </label>
+        <button id="refresh" class="icon-button" type="button" aria-label="Refresh menu">↻</button>
+      </div>
     </header>
 
-    <div class="day-picker" role="tablist" aria-label="Menu day">
-      <button class="day-button active" data-day="today" role="tab" aria-selected="true">Today</button>
-      <button class="day-button" data-day="tomorrow" role="tab" aria-selected="false">Tomorrow</button>
+    <div class="day-picker" role="tablist" aria-label="App section">
+      <button class="day-button active" data-day="menu" role="tab" aria-selected="true">Menu</button>
       <button class="day-button" data-day="timings" role="tab" aria-selected="false">Timings</button>
     </div>
 
@@ -47,6 +52,7 @@
       </div>
     </section>
   </main>
+  <script src="october-menu.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
