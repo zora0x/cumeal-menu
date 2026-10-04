@@ -122,7 +122,8 @@ async function loadMenu() {
     const response = await fetch(firebaseMenuURL(selectedDate), { cache: "no-store" });
     if (!response.ok) throw new Error("Firebase menu request failed");
     const firebaseMenu = await response.json();
-    currentMenu = mergeMenus(firebaseMenu, fallbackMenu(selectedDate));
+    const pdfMenu = fallbackMenu(selectedDate);
+    currentMenu = mergeMenus(firebaseMenu, pdfMenu);
   } catch {
     currentMenu = mergeMenus(null, fallbackMenu(selectedDate));
   }
@@ -195,7 +196,7 @@ document.querySelectorAll(".day-button").forEach(button => {
 function offsetDate(days) {
   const date = new Date();
   date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
+  return dateValue(date);
 }
 
 function refreshApp() {
