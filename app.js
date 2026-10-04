@@ -239,10 +239,20 @@ function refreshApp() {
   button.classList.add("spinning");
   button.disabled = true;
   if (navigator.vibrate) navigator.vibrate(10);
-  Promise.all([loadMenu(), loadAvailability()]).finally(() => {
-    button.classList.remove("spinning");
-    button.disabled = false;
-  });
+  const reloadWithFreshShell = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("refresh", Date.now().toString());
+    window.location.replace(url.toString());
+  };
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.ready
+      .then(registration => registration.update())
+      .then(reloadWithFreshShell)
+      .catch(reloadWithFreshShell);
+  } else {
+    reloadWithFreshShell();
+  }
 }
 
 const today = new Date();

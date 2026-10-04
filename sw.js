@@ -1,5 +1,5 @@
-const CACHE_NAME = "cumeal-shell-v16";
-const SHELL = ["./", "./index.html", "./styles.css", "./app.js?v=16", "./october-menu.js?v=16", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "cumeal-shell-v17";
+const SHELL = ["./", "./index.html", "./styles.css", "./app.js?v=17", "./october-menu.js?v=17", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
