@@ -95,12 +95,14 @@ function escapeHTML(value) {
 }
 
 function fallbackMenu(dateValue) {
-  if (!OCTOBER_MENU[dateValue]) return null;
+  const sourceMenu = OCTOBER_MENU[dateValue] || NOVEMBER_MENU[dateValue];
+  if (!sourceMenu) return null;
+  const southIndianMenu = SOUTH_INDIAN_DINNER[dateValue] || NOVEMBER_SOUTH_INDIAN_DINNER[dateValue];
   const menu = {
-    ...OCTOBER_MENU[dateValue],
-    dinnerSouth: SOUTH_INDIAN_DINNER[dateValue]
+    ...sourceMenu,
+    dinnerSouth: southIndianMenu
   };
-  const dessert = PDF_DESSERTS[dateValue];
+  const dessert = PDF_DESSERTS[dateValue] || NOVEMBER_DESSERTS[dateValue];
   if (dessert && menu.dinner && !menu.dinner.toLowerCase().includes(dessert.toLowerCase())) {
     menu.dinner = `${menu.dinner}, ${dessert}`;
   }
@@ -216,6 +218,9 @@ async function loadAvailability() {
       if (OCTOBER_MENU[value]) cachedDates.add(value);
     }
   }
+  dates.forEach(value => {
+    if (fallbackMenu(value)) cachedDates.add(value);
+  });
   availableDates.clear();
   cachedDates.forEach(value => availableDates.add(value));
   availabilityCache.set(monthKey, cachedDates);
