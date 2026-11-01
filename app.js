@@ -35,6 +35,11 @@ function firebaseMenuURL(dateValue) {
   return `${DATABASE_URL}/${date.getFullYear()}/${month}/${date.getDate()}.json`;
 }
 
+function firebaseMonthURL(year, month) {
+  const monthName = new Date(year, month, 1).toLocaleString("en-US", { month: "long" });
+  return `${DATABASE_URL}/${year}/${monthName}.json`;
+}
+
 function dateValue(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -188,6 +193,7 @@ function renderCalendar() {
   });
   calendar.querySelectorAll("[data-date]").forEach(button => {
     button.addEventListener("click", () => {
+      if (!availableDates.has(button.dataset.date)) return;
       setSelectedDate(button.dataset.date);
       loadMenu();
     });
@@ -210,22 +216,27 @@ async function loadAvailability() {
       if (OCTOBER_MENU[value]) cachedDates.add(value);
     }
   }
+  availableDates.clear();
+  cachedDates.forEach(value => availableDates.add(value));
   availabilityCache.set(monthKey, cachedDates);
   renderCalendar();
-  const results = await Promise.all(dates.map(async value => {
-    try {
-      const response = await fetch(firebaseMenuURL(value), { cache: "no-store" });
-      const menu = await response.json();
-      return [value, Boolean(menu || fallbackMenu(value))];
-    } catch {
-      return [value, Boolean(fallbackMenu(value))];
-    }
-  }));
-  results.forEach(([value, available]) => {
-    if (available) cachedDates.add(value);
-  });
+  try {
+    const response = await fetch(firebaseMonthURL(year, month), { cache: "no-store" });
+    if (!response.ok) throw new Error("Firebase availability request failed");
+    const monthMenus = await response.json();
+    dates.forEach(value => {
+      const day = String(Number(value.slice(-2)));
+      const hasFirebaseMenu = Boolean(normalizeMenu(monthMenus?.[day], value));
+      if (hasFirebaseMenu || fallbackMenu(value)) cachedDates.add(value);
+    });
+  } catch {
+    dates.forEach(value => {
+      if (fallbackMenu(value)) cachedDates.add(value);
+    });
+  }
   availabilityCache.set(monthKey, cachedDates);
   if (request !== availabilityRequest) return;
+  cachedDates.forEach(value => availableDates.add(value));
   renderCalendar();
 }
 
