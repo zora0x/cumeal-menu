@@ -272,9 +272,7 @@ function refreshApp() {
 }
 
 const today = new Date();
-selectedDate = today.getFullYear() === 2026 && today.getMonth() === 9
-  ? dateValue(today)
-  : "2026-10-01";
+selectedDate = dateValue(today);
 dateTrigger.addEventListener("click", () => {
   calendar.hidden = !calendar.hidden;
   if (!calendar.hidden) renderCalendar();
