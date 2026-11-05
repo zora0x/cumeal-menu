@@ -10,6 +10,7 @@ const fields = [
 ];
 
 let selectedSection = "today";
+let menuType = "national";
 let selectedDate = "";
 let currentMenu = null;
 let loadRequest = 0;
@@ -109,6 +110,18 @@ function fallbackMenu(dateValue) {
   return menu;
 }
 
+function internationalMenu(dateValue, regularMenu) {
+  const source = NOVEMBER_INTERNATIONAL_MENU[dateValue];
+  if (!source) return null;
+  const regular = regularMenu || fallbackMenu(dateValue) || {};
+  return Object.fromEntries(Object.entries(source).map(([key, value]) => {
+    const regularValue = key === "snacksBoys" ? regular.snacksBoys : regular[key];
+    return [key, value
+      .replace(/Regular Mess Menu/gi, regularValue || "Regular Menu")
+      .replace(/Regular Menu/gi, regularValue || "Regular Menu")];
+  }));
+}
+
 function normalizeMenu(menu, menuDate = "") {
   if (!menu || typeof menu !== "object" || Array.isArray(menu)) return null;
   const normalized = {};
@@ -148,9 +161,14 @@ async function loadMenu() {
     if (!response.ok) throw new Error("Firebase menu request failed");
     const firebaseMenu = await response.json();
     const pdfMenu = fallbackMenu(selectedDate);
-    currentMenu = mergeMenus(firebaseMenu, pdfMenu);
+    currentMenu = menuType === "international"
+      ? internationalMenu(selectedDate, mergeMenus(firebaseMenu, pdfMenu))
+      : mergeMenus(firebaseMenu, pdfMenu);
   } catch {
-    currentMenu = mergeMenus(null, fallbackMenu(selectedDate));
+    const pdfMenu = fallbackMenu(selectedDate);
+    currentMenu = menuType === "international"
+      ? internationalMenu(selectedDate, pdfMenu)
+      : mergeMenus(null, pdfMenu);
   }
   if (request !== loadRequest) return;
   render();
@@ -258,6 +276,15 @@ document.querySelectorAll(".day-button").forEach(button => {
     }
     loadMenu();
   });
+});
+
+document.querySelector("#menu-type").addEventListener("click", () => {
+  menuType = menuType === "national" ? "international" : "national";
+  const button = document.querySelector("#menu-type");
+  const international = menuType === "international";
+  button.textContent = international ? "International" : "National";
+  button.setAttribute("aria-pressed", String(international));
+  loadMenu();
 });
 
 function offsetDate(days) {
