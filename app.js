@@ -120,6 +120,8 @@ function internationalMenu(dateValue, regularMenu) {
       .replace(/Regular Mess Menu/gi, regularValue || "Regular Menu")
       .replace(/Regular Menu/gi, regularValue || "Regular Menu")];
   }));
+  menu.snacksBoys = regular.snacksBoys ? `${regular.snacksBoys}, Coffee/Tea` : "Coffee/Tea";
+  menu.snacksGirls = regular.snacksGirls ? `${regular.snacksGirls}, Coffee/Tea` : "Coffee/Tea";
   const dessert = NOVEMBER_DESSERTS[dateValue] || PDF_DESSERTS[dateValue];
   if (dessert && menu.dinner && !menu.dinner.toLowerCase().includes(dessert.toLowerCase())) {
     menu.dinner = `${menu.dinner}, ${dessert}`;
@@ -287,7 +289,8 @@ document.querySelector("#menu-type").addEventListener("click", () => {
   menuType = menuType === "national" ? "international" : "national";
   const button = document.querySelector("#menu-type");
   const international = menuType === "international";
-  button.textContent = international ? "International" : "National";
+  button.textContent = international ? "🌍" : "🇮🇳";
+  button.setAttribute("aria-label", international ? "Switch to national menu" : "Switch to international menu");
   button.setAttribute("aria-pressed", String(international));
   loadMenu();
 });
