@@ -114,12 +114,17 @@ function internationalMenu(dateValue, regularMenu) {
   const source = NOVEMBER_INTERNATIONAL_MENU[dateValue];
   if (!source) return null;
   const regular = regularMenu || fallbackMenu(dateValue) || {};
-  return Object.fromEntries(Object.entries(source).map(([key, value]) => {
+  const menu = Object.fromEntries(Object.entries(source).map(([key, value]) => {
     const regularValue = key === "snacksBoys" ? regular.snacksBoys : regular[key];
     return [key, value
       .replace(/Regular Mess Menu/gi, regularValue || "Regular Menu")
       .replace(/Regular Menu/gi, regularValue || "Regular Menu")];
   }));
+  const dessert = NOVEMBER_DESSERTS[dateValue] || PDF_DESSERTS[dateValue];
+  if (dessert && menu.dinner && !menu.dinner.toLowerCase().includes(dessert.toLowerCase())) {
+    menu.dinner = `${menu.dinner}, ${dessert}`;
+  }
+  return menu;
 }
 
 function normalizeMenu(menu, menuDate = "") {
